@@ -13,5 +13,4 @@ UCLASS()
 class PERFECT_WORLD_API APW_PlayerController : public APlayerController
 {
 	GENERATED_BODY()
-	
 };

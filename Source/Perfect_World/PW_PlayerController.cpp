@@ -2,4 +2,7 @@
 
 
 #include "PW_PlayerController.h"
-
+#include "Blueprint/AIBlueprintHelperLibrary.h"
+#include "Runtime/Engine/Classes/Components/DecalComponent.h"
+#include "HeadMountedDisplayFunctionLibrary.h"
+#include "Engine/World.h"

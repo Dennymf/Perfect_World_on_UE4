@@ -37,7 +37,6 @@ protected:
 	/** Called for side to side input */
 	void MoveRight(float Value);
 
-
 protected:
 	// APawn interface
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
