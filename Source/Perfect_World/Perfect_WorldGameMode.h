@@ -13,6 +13,7 @@ class APerfect_WorldGameMode : public AGameModeBase
 
 public:
 	APerfect_WorldGameMode();
+
 };
 
 
