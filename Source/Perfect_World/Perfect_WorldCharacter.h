@@ -18,9 +18,13 @@ class APerfect_WorldCharacter : public ACharacter
 	/** Follow camera */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class UCameraComponent* FollowCamera;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+	class UDecalComponent* CursorToWorld;
+
 public:
 	APerfect_WorldCharacter();
-
+	virtual void Tick(float DeltaSeconds) override;
 	/** Base turn rate, in deg/sec. Other scaling may affect final turn rate. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Camera)
 	float BaseTurnRate;
@@ -37,6 +41,8 @@ protected:
 	/** Called for side to side input */
 	void MoveRight(float Value);
 
+	void MoveToCursor();
+
 protected:
 	// APawn interface
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
@@ -47,5 +53,8 @@ public:
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	/** Returns FollowCamera subobject **/
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
+	/** Returns CursorToWorld subobject **/
+	FORCEINLINE class UDecalComponent* GetCursorToWorld() { return CursorToWorld; }
+
 };
 

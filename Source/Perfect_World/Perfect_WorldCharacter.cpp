@@ -4,10 +4,16 @@
 #include "HeadMountedDisplayFunctionLibrary.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "Components/DecalComponent.h"
 #include "Components/InputComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Controller.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "Materials/Material.h"
+#include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetMathLibrary.h"
+#include "Engine/Player.h"
+#include "Engine/World.h"
 
 //////////////////////////////////////////////////////////////////////////
 // APerfect_WorldCharacter
@@ -45,8 +51,26 @@ APerfect_WorldCharacter::APerfect_WorldCharacter()
 
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named MyCharacter (to avoid direct content references in C++)
+
+	// Create a decal in the world to show the cursor's location
+	CursorToWorld = CreateDefaultSubobject<UDecalComponent>("CursorToWorld");
+	static ConstructorHelpers::FObjectFinder<UMaterial> DecalMaterialAsset(TEXT("Material'/Game/Blueprint/Character/M_Cursor_Decal.M_Cursor_Decal'"));
+	if (DecalMaterialAsset.Succeeded())
+	{
+		CursorToWorld->SetDecalMaterial(DecalMaterialAsset.Object);
+	}
+	CursorToWorld->DecalSize = FVector(16.0f, 32.0f, 32.0f);
+	CursorToWorld->SetRelativeRotation(FRotator(90.0f, 0.0f, 0.0f).Quaternion());
+
+	// Activate ticking in order to update the cursor every frame.
+	//PrimaryActorTick.bCanEverTick = true;
+	//PrimaryActorTick.bStartWithTickEnabled = true;
 }
 
+void APerfect_WorldCharacter::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+}
 //////////////////////////////////////////////////////////////////////////
 // Input
 
@@ -59,13 +83,14 @@ void APerfect_WorldCharacter::SetupPlayerInputComponent(class UInputComponent* P
 
 	PlayerInputComponent->BindAxis("MoveForward", this, &APerfect_WorldCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &APerfect_WorldCharacter::MoveRight);
-
+	PlayerInputComponent->BindAction("MoveToCursor", IE_Pressed, this, &APerfect_WorldCharacter::MoveToCursor);
 	// We have 2 versions of the rotation bindings to handle different kinds of devices differently
 	// "turn" handles devices that provide an absolute delta, such as a mouse.
 	// "turnrate" is for devices that we choose to treat as a rate of change, such as an analog joystick
 	PlayerInputComponent->BindAxis("Turn", this, &APawn::AddControllerYawInput);
 	PlayerInputComponent->BindAxis("LookUp", this, &APawn::AddControllerPitchInput);
 }
+
 
 
 void APerfect_WorldCharacter::MoveForward(float Value)
@@ -92,3 +117,16 @@ void APerfect_WorldCharacter::MoveRight(float Value)
 	}
 }
 
+void APerfect_WorldCharacter::MoveToCursor()
+{
+	if (CursorToWorld)
+	{
+		if (APlayerController* PC = Cast<APlayerController>(GetController()))
+		{
+			FHitResult TraceHitResult;
+			PC->GetHitResultUnderCursor(ECC_Visibility, true, TraceHitResult);
+			UGameplayStatics::SpawnDecalAtLocation(GetWorld(), CursorToWorld->GetDecalMaterial(),
+				FVector(16.0f, 32.0f, 32.0f), TraceHitResult.Location, TraceHitResult.ImpactNormal.Rotation(), 10.0f);
+		}
+	}
+}
