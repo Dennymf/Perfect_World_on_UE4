@@ -1,19 +1,22 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "Perfect_WorldCharacter.h"
-#include "HeadMountedDisplayFunctionLibrary.h"
+#include "Blueprint/AIBlueprintHelperLibrary.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/DecalComponent.h"
 #include "Components/InputComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Controller.h"
+#include "GameFramework/PlayerController.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "HeadMountedDisplayFunctionLibrary.h"
 #include "Materials/Material.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Engine/Player.h"
 #include "Engine/World.h"
+#include <iostream>
 
 //////////////////////////////////////////////////////////////////////////
 // APerfect_WorldCharacter
@@ -61,7 +64,7 @@ APerfect_WorldCharacter::APerfect_WorldCharacter()
 	}
 	CursorToWorld->DecalSize = FVector(16.0f, 32.0f, 32.0f);
 	CursorToWorld->SetRelativeRotation(FRotator(90.0f, 0.0f, 0.0f).Quaternion());
-
+	CursorToWorld->SetVisibility(false);
 	// Activate ticking in order to update the cursor every frame.
 	//PrimaryActorTick.bCanEverTick = true;
 	//PrimaryActorTick.bStartWithTickEnabled = true;
@@ -70,6 +73,37 @@ APerfect_WorldCharacter::APerfect_WorldCharacter()
 void APerfect_WorldCharacter::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
+	if (CursorToWorld->GetVisibleFlag())
+	{
+		MoveToCursorTick(DeltaSeconds);
+	}
+}
+
+void APerfect_WorldCharacter::MoveToCursorTick(float DeltaSeconds)
+{
+	if (Controller)
+	{
+		FHitResult Hit;
+		APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+		PC->GetHitResultUnderCursor(ECC_Visibility, false, Hit);
+		FRotator rotator = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), CursorToWorld->GetRelativeLocation());
+		//SetActorRotation(FQuat(FRotator(0.0f, yaw, 0.0f)));
+		const FVector Direction = FRotationMatrix(rotator).GetUnitAxis(EAxis::X);
+		AddMovementInput(Direction, 1.0);
+
+		float dist = FVector::Dist(GetActorLocation(), CursorToWorld->GetRelativeLocation());
+		
+		if (OldDistToCursor == dist)
+		{
+			++TickToCursor;
+		}
+		if (dist <= 100.0f || TickToCursor == 5)
+		{
+			CursorToWorld->SetVisibility(false);
+			TickToCursor = 0;
+		}
+		OldDistToCursor = dist;
+	}
 }
 //////////////////////////////////////////////////////////////////////////
 // Input
@@ -97,6 +131,7 @@ void APerfect_WorldCharacter::MoveForward(float Value)
 {
 	if ((Controller != nullptr) && (Value != 0.0f))
 	{
+		CursorToWorld->SetVisibility(false);
 		const FRotator Rotation = Controller->GetControlRotation();
 		const FRotator YawRotation(0, Rotation.Yaw, 0);
 
@@ -109,6 +144,7 @@ void APerfect_WorldCharacter::MoveRight(float Value)
 {
 	if ((Controller != nullptr) && (Value != 0.0f) )
 	{
+		CursorToWorld->SetVisibility(false);
 		const FRotator Rotation = Controller->GetControlRotation();
 		const FRotator YawRotation(0, Rotation.Yaw, 0);
 	
@@ -125,8 +161,8 @@ void APerfect_WorldCharacter::MoveToCursor()
 		{
 			FHitResult TraceHitResult;
 			PC->GetHitResultUnderCursor(ECC_Visibility, true, TraceHitResult);
-			UGameplayStatics::SpawnDecalAtLocation(GetWorld(), CursorToWorld->GetDecalMaterial(),
-				FVector(16.0f, 32.0f, 32.0f), TraceHitResult.Location, TraceHitResult.ImpactNormal.Rotation(), 10.0f);
+			CursorToWorld->SetWorldLocationAndRotation(TraceHitResult.Location, TraceHitResult.ImpactNormal.Rotation());
+			CursorToWorld->SetVisibility(true);
 		}
 	}
 }
