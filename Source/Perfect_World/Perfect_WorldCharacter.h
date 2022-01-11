@@ -19,12 +19,17 @@ class APerfect_WorldCharacter : public ACharacter
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class UCameraComponent* FollowCamera;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	class UDecalComponent* CursorToWorld;
 
+	float OldDistToCursor;
+	int8 TickToCursor;
 public:
 	APerfect_WorldCharacter();
 	virtual void Tick(float DeltaSeconds) override;
+
+	void MoveToCursorTick(float DeltaSeconds);
+
 	/** Base turn rate, in deg/sec. Other scaling may affect final turn rate. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Camera)
 	float BaseTurnRate;
