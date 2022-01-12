@@ -125,6 +125,14 @@ void APerfect_WorldCharacter::SetupPlayerInputComponent(class UInputComponent* P
 	PlayerInputComponent->BindAxis("LookUp", this, &APawn::AddControllerPitchInput);
 }
 
+void APerfect_WorldCharacter::ChangeCurrentHealth(float ChangeValue)
+{
+	bIsFight = true;
+	FightTimer = 15.0f;
+	CurrentHP = std::max(0, static_cast<int32>(CurrentHP) - static_cast<int32>(ChangeValue));
+	OnHPChange.Broadcast(CurrentHP);
+}
+
 
 
 void APerfect_WorldCharacter::MoveForward(float Value)
@@ -169,16 +177,31 @@ void APerfect_WorldCharacter::MoveToCursor()
 
 void APerfect_WorldCharacter::RegenerationTick(float DeltaSeconds)
 {
-	if (Timer > 0.0f)
+	if (bIsFight)
 	{
-		Timer -= DeltaSeconds;
-	}	
+		if (FightTimer > 0.0f)
+		{
+			FightTimer -= DeltaSeconds;
+		}
+		else
+		{
+			bIsFight = false;
+			Timer = 0.0f;
+		}
+	}
 	else
 	{
-		Timer = 1.0f;
-		CurrentHP = std::min(MaxHP, CurrentHP + RegenerationHP);
-		CurrentMP = std::min(MaxMP, CurrentMP + RegenerationMP);
-		OnHPChange.Broadcast(CurrentHP);
-		OnMPChange.Broadcast(CurrentMP);
+		if (Timer > 0.0f)
+		{
+			Timer -= DeltaSeconds;
+		}
+		else
+		{
+			Timer = 1.0f;
+			CurrentHP = std::min(MaxHP, CurrentHP + RegenerationHP);
+			CurrentMP = std::min(MaxMP, CurrentMP + RegenerationMP);
+			OnHPChange.Broadcast(CurrentHP);
+			OnMPChange.Broadcast(CurrentMP);
+		}
 	}
 }

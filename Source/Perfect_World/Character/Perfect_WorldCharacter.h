@@ -59,6 +59,9 @@ class APerfect_WorldCharacter : public ACharacter
 	float CurrentSpeed = 500.0f;
 	float AttackSpeed = 1.0f;
 
+	bool bIsFight = false;
+	float FightTimer = 0.0f;
+
 public:
 	APerfect_WorldCharacter();
 	virtual void Tick(float DeltaSeconds) override;
@@ -99,7 +102,9 @@ public:
 	FORCEINLINE class UDecalComponent* GetCursorToWorld() { return CursorToWorld; }
 	UFUNCTION(BlueprintCallable)
 	ECharacterSpiritualCultivation getStatus() { return Cultivation; }
-	
+	UFUNCTION(BlueprintCallable)
+	void ChangeCurrentHealth(float ChangeValue);
+
 	UFUNCTION(BlueprintCallable)
 	int32 GetHP()
 	{
