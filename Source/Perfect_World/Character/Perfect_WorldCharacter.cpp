@@ -90,7 +90,8 @@ void APerfect_WorldCharacter::MoveToCursorTick(float DeltaSeconds)
 		FRotator rotator = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), CursorToWorld->GetRelativeLocation());
 		//SetActorRotation(FQuat(FRotator(0.0f, yaw, 0.0f)));
 		const FVector Direction = FRotationMatrix(rotator).GetUnitAxis(EAxis::X);
-		AddMovementInput(Direction, 1.0);
+		//AddMovementInput(Direction, 1.0);
+		SetActorRotation(rotator);
 
 		float dist = FVector::Dist(GetActorLocation(), CursorToWorld->GetRelativeLocation());
 		
@@ -131,16 +132,70 @@ void APerfect_WorldCharacter::ChangeCurrentHealth(float ChangeValue)
 	bIsFight = true;
 	FightTimer = 15.0f;
 	CurrentHP = std::max(0, static_cast<int32>(CurrentHP) - static_cast<int32>(ChangeValue));
-	OnHPChange.Broadcast(CurrentHP);
+	OnHPChange.Broadcast(CurrentHP, MaxHP);
 }
 
 void APerfect_WorldCharacter::ChangeCurrentXP(float ChangeValue)
 {
 	CurrentXP += ChangeValue;
-	OnXPChange.Broadcast(CurrentXP);
+	OnXPChange.Broadcast(CurrentXP, NeededXP);
 }
 
+void APerfect_WorldCharacter::ChangeMaxHP(float Value)
+{
+	MaxHP = MaxHP + (Value * 20);
+	OnHPChange.Broadcast(CurrentHP, MaxHP);
+}
 
+void APerfect_WorldCharacter::ChangeMaxMP(float Value)
+{
+	MaxMP = MaxMP + (Value * 20);
+	OnMPChange.Broadcast(CurrentMP, MaxMP);
+}
+
+void APerfect_WorldCharacter::ChangePhysDamage(float Value)
+{
+	MinDamagePhys = MinDamagePhys + (Value);
+	MaxDamagePhys = MaxDamagePhys + (Value);
+	OnPhysdamageChange.Broadcast(MinDamagePhys, MaxDamagePhys);
+}
+
+void APerfect_WorldCharacter::ChangeMagDamage(float Value)
+{
+	MinDamageMagic = MinDamageMagic + (Value);
+	MaxDamageMagic = MaxDamageMagic + (Value);
+	OnMagdamageChange.Broadcast(MinDamageMagic, MaxDamageMagic);
+}
+
+void APerfect_WorldCharacter::SetCurrentIntelligence(int32 value)
+{
+	ChangeMaxMP(value - CurrentIntelligence);
+	ChangeMagDamage(value - CurrentIntelligence);
+	CurrentIntelligence = value;
+}
+
+void APerfect_WorldCharacter::SetCurrentStrength(int32 value)
+{
+	ChangePhysDamage(value - CurrentStrength);
+	CurrentStrength = value;
+}
+
+void APerfect_WorldCharacter::SetCurrentEndurance(int32 value)
+{
+	ChangeMaxHP(value - CurrentEndurance);
+	CurrentEndurance = value;
+}
+
+void APerfect_WorldCharacter::SetCurrentAgility(int32 value)
+{
+	ChangePhysDamage(value - CurrentAgility);
+	CurrentAgility = value;
+}
+
+void APerfect_WorldCharacter::SetFreePoint(int32 value)
+{
+	FreePoint = value;
+}
 
 void APerfect_WorldCharacter::MoveForward(float Value)
 {
@@ -207,8 +262,8 @@ void APerfect_WorldCharacter::RegenerationTick(float DeltaSeconds)
 			Timer = 1.0f;
 			CurrentHP = std::min(MaxHP, CurrentHP + RegenerationHP);
 			CurrentMP = std::min(MaxMP, CurrentMP + RegenerationMP);
-			OnHPChange.Broadcast(CurrentHP);
-			OnMPChange.Broadcast(CurrentMP);
+			OnHPChange.Broadcast(CurrentHP, MaxHP);
+			OnMPChange.Broadcast(CurrentMP, MaxMP);
 			//ChangeCurrentXP(25);
 		}
 	}
@@ -227,6 +282,6 @@ void APerfect_WorldCharacter::LevelUpTick()
 		FreePoint += 5;
 		OnLevelChange.Broadcast(CurrentLevel);
 		OnFreePointChange.Broadcast(FreePoint);
-		OnXPChange.Broadcast(CurrentXP);
+		OnXPChange.Broadcast(CurrentXP, NeededXP);
 	}
 }
