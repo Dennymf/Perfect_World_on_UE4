@@ -7,8 +7,11 @@
 #include "../FuncLibrary/Types.h"
 #include "Perfect_WorldCharacter.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnHPChange, int32, NewHP);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMPChange, int32, NewMP);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnHPChange, int32, HP);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMPChange, int32, MP);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnLevelChange, int32, Level);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnFreePointChange, int32, FreePoint);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnXPChange, int32, XP);
 
 UCLASS(config=Game)
 class APerfect_WorldCharacter : public ACharacter
@@ -26,16 +29,14 @@ class APerfect_WorldCharacter : public ACharacter
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	class UDecalComponent* CursorToWorld;
 
-	UPROPERTY(BlueprintAssignable, Category = "Stats");
-	FOnHPChange OnHPChange;
-	UPROPERTY(BlueprintAssignable, Category = "Stats");
-	FOnMPChange OnMPChange;
+	class UWidget* statsWidget;
 
 	float OldDistToCursor;
 	int8 TickToCursor;
 
 	ECharacterSpiritualCultivation Cultivation = ECharacterSpiritualCultivation::SpiritualAdept;
 	uint8 CurrentLevel = 1;
+	uint8 MaxLevel = 105;
 	uint32 CurrentXP = 0;
 	uint32 NeededXP = 100;
 	uint32 MinDamagePhys = 1;
@@ -55,7 +56,7 @@ class APerfect_WorldCharacter : public ACharacter
 	uint32 CurrentAgility = 5;
 	uint32 CurrentStrength = 5;
 	uint32 CurrentEndurance = 5;
-	uint32 FreePoint = 0;
+	uint32 FreePoint = 5;
 	float CurrentSpeed = 500.0f;
 	float AttackSpeed = 1.0f;
 
@@ -63,6 +64,17 @@ class APerfect_WorldCharacter : public ACharacter
 	float FightTimer = 0.0f;
 
 public:
+	UPROPERTY(BlueprintAssignable, Category = "Stats");
+	FOnHPChange OnHPChange;
+	UPROPERTY(BlueprintAssignable, Category = "Stats");
+	FOnMPChange OnMPChange;
+	UPROPERTY(BlueprintAssignable, Category = "Stats");
+	FOnLevelChange OnLevelChange;
+	UPROPERTY(BlueprintAssignable, Category = "Stats");
+	FOnFreePointChange OnFreePointChange;
+	UPROPERTY(BlueprintAssignable, Category = "Stats");
+	FOnXPChange OnXPChange;
+
 	APerfect_WorldCharacter();
 	virtual void Tick(float DeltaSeconds) override;
 
@@ -88,6 +100,8 @@ protected:
 
 	void RegenerationTick(float DeltaSeconds);
 
+	void LevelUpTick();
+
 protected:
 	// APawn interface
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
@@ -104,6 +118,8 @@ public:
 	ECharacterSpiritualCultivation getStatus() { return Cultivation; }
 	UFUNCTION(BlueprintCallable)
 	void ChangeCurrentHealth(float ChangeValue);
+	UFUNCTION(BlueprintCallable)
+	void ChangeCurrentXP(float ChangeValue);
 
 	UFUNCTION(BlueprintCallable)
 	int32 GetHP()
@@ -199,5 +215,35 @@ public:
 	int32 GetFreePoint()
 	{
 		return FreePoint;
+	}
+
+	UFUNCTION(BlueprintCallable)
+		void SetCurrentIntelligence(int32 value)
+	{
+		CurrentIntelligence = value;
+	}
+
+	UFUNCTION(BlueprintCallable)
+		void SetCurrentStrength(int32 value)
+	{
+		CurrentStrength = value;
+	}
+
+	UFUNCTION(BlueprintCallable)
+		void SetCurrentEndurance(int32 value)
+	{
+		CurrentEndurance = value;
+	}
+
+	UFUNCTION(BlueprintCallable)
+		void SetCurrentAgility(int32 value)
+	{
+		CurrentAgility = value;
+	}
+
+	UFUNCTION(BlueprintCallable)
+		void SetFreePoint(int32 value)
+	{
+		FreePoint = value;
 	}
 };

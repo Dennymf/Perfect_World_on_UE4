@@ -77,6 +77,7 @@ void APerfect_WorldCharacter::Tick(float DeltaSeconds)
 		MoveToCursorTick(DeltaSeconds);
 	}
 	RegenerationTick(DeltaSeconds);
+	LevelUpTick();
 }
 
 void APerfect_WorldCharacter::MoveToCursorTick(float DeltaSeconds)
@@ -131,6 +132,12 @@ void APerfect_WorldCharacter::ChangeCurrentHealth(float ChangeValue)
 	FightTimer = 15.0f;
 	CurrentHP = std::max(0, static_cast<int32>(CurrentHP) - static_cast<int32>(ChangeValue));
 	OnHPChange.Broadcast(CurrentHP);
+}
+
+void APerfect_WorldCharacter::ChangeCurrentXP(float ChangeValue)
+{
+	CurrentXP += ChangeValue;
+	OnXPChange.Broadcast(CurrentXP);
 }
 
 
@@ -202,6 +209,24 @@ void APerfect_WorldCharacter::RegenerationTick(float DeltaSeconds)
 			CurrentMP = std::min(MaxMP, CurrentMP + RegenerationMP);
 			OnHPChange.Broadcast(CurrentHP);
 			OnMPChange.Broadcast(CurrentMP);
+			//ChangeCurrentXP(25);
 		}
+	}
+}
+
+void APerfect_WorldCharacter::LevelUpTick()
+{
+	if (CurrentLevel == 105)
+	{
+		CurrentXP = 0;
+	}
+	else if (CurrentXP >= NeededXP)
+	{
+		CurrentXP -= NeededXP;
+		++CurrentLevel;
+		FreePoint += 5;
+		OnLevelChange.Broadcast(CurrentLevel);
+		OnFreePointChange.Broadcast(FreePoint);
+		OnXPChange.Broadcast(CurrentXP);
 	}
 }
