@@ -65,7 +65,7 @@ APerfect_WorldCharacter::APerfect_WorldCharacter()
 	CursorToWorld->DecalSize = FVector(16.0f, 32.0f, 32.0f);
 	CursorToWorld->SetRelativeRotation(FRotator(90.0f, 0.0f, 0.0f).Quaternion());
 	CursorToWorld->SetVisibility(false);
-	
+
 	GetCharacterMovement()->MaxWalkSpeed = CurrentSpeed;
 }
 
@@ -90,11 +90,11 @@ void APerfect_WorldCharacter::MoveToCursorTick(float DeltaSeconds)
 		FRotator rotator = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), CursorToWorld->GetRelativeLocation());
 		//SetActorRotation(FQuat(FRotator(0.0f, yaw, 0.0f)));
 		const FVector Direction = FRotationMatrix(rotator).GetUnitAxis(EAxis::X);
-		//AddMovementInput(Direction, 1.0);
-		SetActorRotation(rotator);
+		AddMovementInput(Direction, 1.0);
+		//SetActorRotation(rotator);
 
 		float dist = FVector::Dist(GetActorLocation(), CursorToWorld->GetRelativeLocation());
-		
+
 		if (OldDistToCursor == dist)
 		{
 			++TickToCursor;
@@ -212,12 +212,12 @@ void APerfect_WorldCharacter::MoveForward(float Value)
 
 void APerfect_WorldCharacter::MoveRight(float Value)
 {
-	if ((Controller != nullptr) && (Value != 0.0f) )
+	if ((Controller != nullptr) && (Value != 0.0f))
 	{
 		CursorToWorld->SetVisibility(false);
 		const FRotator Rotation = Controller->GetControlRotation();
 		const FRotator YawRotation(0, Rotation.Yaw, 0);
-	
+
 		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 		AddMovementInput(Direction, Value);
 	}
