@@ -90,8 +90,8 @@ void APerfect_WorldCharacter::MoveToCursorTick(float DeltaSeconds)
 		FRotator rotator = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), CursorToWorld->GetRelativeLocation());
 		//SetActorRotation(FQuat(FRotator(0.0f, yaw, 0.0f)));
 		const FVector Direction = FRotationMatrix(rotator).GetUnitAxis(EAxis::X);
-		//AddMovementInput(Direction, 1.0);
-		SetActorRotation(rotator);
+		AddMovementInput(Direction, 1);
+		//SetActorRotation(rotator);
 
 		float dist = FVector::Dist(GetActorLocation(), CursorToWorld->GetRelativeLocation());
 		
