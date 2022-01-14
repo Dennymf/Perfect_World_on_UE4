@@ -65,6 +65,9 @@ class APerfect_WorldCharacter : public ACharacter
 	bool bIsFight = false;
 	float FightTimer = 0.0f;
 
+	bool bIsJumping = false;
+	int8 CurrentCountJump = 0;
+
 public:
 	UPROPERTY(BlueprintAssignable, Category = "Stats");
 	FOnHPChange OnHPChange;
@@ -102,7 +105,11 @@ protected:
 	/** Called for side to side input */
 	void MoveRight(float Value);
 
+	void DoJump();
+
 	void MoveToCursor();
+
+	void CheckJump();
 
 	void RegenerationTick(float DeltaSeconds);
 

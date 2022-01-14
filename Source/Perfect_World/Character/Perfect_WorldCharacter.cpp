@@ -67,6 +67,8 @@ APerfect_WorldCharacter::APerfect_WorldCharacter()
 	CursorToWorld->SetVisibility(false);
 
 	GetCharacterMovement()->MaxWalkSpeed = CurrentSpeed;
+	GetCharacterMovement()->MinAnalogWalkSpeed = CurrentSpeed;
+	GetCharacterMovement()->AirControl = 1.0f;
 }
 
 void APerfect_WorldCharacter::Tick(float DeltaSeconds)
@@ -78,6 +80,7 @@ void APerfect_WorldCharacter::Tick(float DeltaSeconds)
 	}
 	RegenerationTick(DeltaSeconds);
 	LevelUpTick();
+	CheckJump();
 }
 
 void APerfect_WorldCharacter::MoveToCursorTick(float DeltaSeconds)
@@ -92,14 +95,18 @@ void APerfect_WorldCharacter::MoveToCursorTick(float DeltaSeconds)
 		const FVector Direction = FRotationMatrix(rotator).GetUnitAxis(EAxis::X);
 		AddMovementInput(Direction, 1.0);
 		//SetActorRotation(rotator);
+		FVector CharacteLocation = GetActorLocation();
+		CharacteLocation.Z = 0.0f;
+		FVector CursorLocation = CursorToWorld->GetRelativeLocation();
+		CursorLocation.Z = 0.0f;
 
-		float dist = FVector::Dist(GetActorLocation(), CursorToWorld->GetRelativeLocation());
+		float dist = FVector::Dist(CharacteLocation, CursorLocation);
 
 		if (OldDistToCursor == dist)
 		{
 			++TickToCursor;
 		}
-		if (dist <= 100.0f || TickToCursor == 5)
+		if (dist <= 10.0f || TickToCursor == 3)
 		{
 			CursorToWorld->SetVisibility(false);
 			TickToCursor = 0;
@@ -114,8 +121,8 @@ void APerfect_WorldCharacter::SetupPlayerInputComponent(class UInputComponent* P
 {
 	// Set up gameplay key bindings
 	check(PlayerInputComponent);
-	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
-	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
+	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &APerfect_WorldCharacter::DoJump);
+	//PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
 
 	PlayerInputComponent->BindAxis("MoveForward", this, &APerfect_WorldCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &APerfect_WorldCharacter::MoveRight);
@@ -204,9 +211,9 @@ void APerfect_WorldCharacter::MoveForward(float Value)
 		CursorToWorld->SetVisibility(false);
 		const FRotator Rotation = Controller->GetControlRotation();
 		const FRotator YawRotation(0, Rotation.Yaw, 0);
-
 		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
-		AddMovementInput(Direction, Value);
+		//AddMovementInput(Direction, Value);
+		GetCharacterMovement()->AddInputVector(Direction * Value);
 	}
 }
 
@@ -223,6 +230,16 @@ void APerfect_WorldCharacter::MoveRight(float Value)
 	}
 }
 
+void APerfect_WorldCharacter::DoJump()
+{
+	if (CurrentCountJump < 2)
+	{
+		bIsJumping = true;
+		++CurrentCountJump;
+		LaunchCharacter(FVector(0.0, 0.0f, 1000.0f), false, true);
+	}
+}
+
 void APerfect_WorldCharacter::MoveToCursor()
 {
 	if (CursorToWorld)
@@ -233,6 +250,18 @@ void APerfect_WorldCharacter::MoveToCursor()
 			PC->GetHitResultUnderCursor(ECC_Visibility, true, TraceHitResult);
 			CursorToWorld->SetWorldLocationAndRotation(TraceHitResult.Location, TraceHitResult.ImpactNormal.Rotation());
 			CursorToWorld->SetVisibility(true);
+		}
+	}
+}
+
+void APerfect_WorldCharacter::CheckJump()
+{
+	if (APlayerController* PC = Cast<APlayerController>(GetController()))
+	{
+		if (!GetCharacterMovement()->IsFalling())
+		{
+			bIsJumping = false;
+			CurrentCountJump = 0;
 		}
 	}
 }
