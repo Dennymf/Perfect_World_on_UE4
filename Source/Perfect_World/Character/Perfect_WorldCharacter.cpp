@@ -57,11 +57,11 @@ APerfect_WorldCharacter::APerfect_WorldCharacter()
 
 	// Create a decal in the world to show the cursor's location
 	CursorToWorld = CreateDefaultSubobject<UDecalComponent>("CursorToWorld");
-	static ConstructorHelpers::FObjectFinder<UMaterial> DecalMaterialAsset(TEXT("Material'/Game/Blueprints/Character/M_Cursor_Decal.M_Cursor_Decal'"));
-	if (DecalMaterialAsset.Succeeded())
-	{
-		CursorToWorld->SetDecalMaterial(DecalMaterialAsset.Object);
-	}
+//	static ConstructorHelpers::FObjectFinder<UMaterial> DecalMaterialAsset(TEXT("Material'/Game/Blueprints/Character/M_Cursor_Decal.M_Cursor_Decal'"));
+	//if (DecalMaterialAsset.Succeeded())
+	//{
+	//	CursorToWorld->SetDecalMaterial(DecalMaterialAsset.Object);
+	//}
 	CursorToWorld->DecalSize = FVector(16.0f, 32.0f, 32.0f);
 	CursorToWorld->SetRelativeRotation(FRotator(90.0f, 0.0f, 0.0f).Quaternion());
 	CursorToWorld->SetVisibility(false);
@@ -99,16 +99,18 @@ void APerfect_WorldCharacter::MoveToCursorTick(float DeltaSeconds)
 		CharacteLocation.Z = 0.0f;
 		FVector CursorLocation = CursorToWorld->GetRelativeLocation();
 		CursorLocation.Z = 0.0f;
-
+		UE_LOG(LogTemp, Warning, TEXT("Cursor1: %s"), *CursorLocation.ToString());
+		//UE_LOG(LogTemp, Warning, TEXT("Character: %s"), *CharacteLocation.ToString());
 		float dist = FVector::Dist(CharacteLocation, CursorLocation);
 
 		if (OldDistToCursor == dist)
 		{
 			++TickToCursor;
 		}
-		if (dist <= 10.0f || TickToCursor == 3)
+		if (dist <= 5.0f || TickToCursor == 3)
 		{
 			CursorToWorld->SetVisibility(false);
+			AddMovementInput(Direction, 0.0);
 			TickToCursor = 0;
 		}
 		OldDistToCursor = dist;
@@ -248,8 +250,12 @@ void APerfect_WorldCharacter::MoveToCursor()
 		{
 			FHitResult TraceHitResult;
 			PC->GetHitResultUnderCursor(ECC_Visibility, true, TraceHitResult);
-			CursorToWorld->SetWorldLocationAndRotation(TraceHitResult.Location, TraceHitResult.ImpactNormal.Rotation());
+			CursorToWorld->SetRelativeLocation(TraceHitResult.Location);
+			CursorToWorld->SetRelativeRotation(TraceHitResult.ImpactNormal.Rotation());
 			CursorToWorld->SetVisibility(true);
+			//FVector CursorLocation = CursorToWorld->GetRelativeLocation();
+			//CursorLocation.Z = 0.0f;
+			//UE_LOG(LogTemp, Warning, TEXT("Cursor: %s"), *CursorLocation.ToString());
 		}
 	}
 }
