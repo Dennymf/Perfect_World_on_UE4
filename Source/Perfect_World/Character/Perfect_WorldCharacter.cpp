@@ -70,7 +70,7 @@ APerfect_WorldCharacter::APerfect_WorldCharacter()
 	GetCharacterMovement()->MinAnalogWalkSpeed = CurrentSpeed;
 	GetCharacterMovement()->AirControl = 1.0f;
 
-	HealthComponent = CreateDefaultSubobject<UPW_CharacterHealthComponent>(TEXT("HealthComponent"));
+	CharHealthComponent = CreateDefaultSubobject<UPW_CharacterHealthComponent>(TEXT("HealthComponent"));
 }
 
 void APerfect_WorldCharacter::Tick(float DeltaSeconds)

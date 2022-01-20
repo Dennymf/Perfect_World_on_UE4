@@ -42,7 +42,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Health")
 		void SetCurrentMaxHealth(uint32 Value);
 	UFUNCTION(BlueprintCallable, Category = "Health")
-		void ChangeCurrentHealth(uint32 Value);
+		virtual void ChangeCurrentHealth(uint32 Value);
 	UFUNCTION(BlueprintNativeEvent)
 		void DeadEvent();
 };

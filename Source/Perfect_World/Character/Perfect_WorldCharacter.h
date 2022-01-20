@@ -31,8 +31,8 @@ class APerfect_WorldCharacter : public ACharacter
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Cursor, meta = (AllowPrivateAccess = "true"))
 		class UDecalComponent* CursorToWorld;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
-		class UPW_CharacterHealthComponent* HealthComponent;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Health", meta = (AllowPrivateAccess = "true"))
+		class UPW_CharacterHealthComponent* CharHealthComponent;
 
 	class UWidget* statsWidget;
 

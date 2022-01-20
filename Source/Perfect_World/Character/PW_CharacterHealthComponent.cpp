@@ -5,9 +5,9 @@
 
 void UPW_CharacterHealthComponent::ChangeCurrentHealth(uint32 Value)
 {
+	Super::ChangeCurrentHealth(Value);
 	bIsFight = true;
 	FightTimer = 15.0f;
-	Super::ChangeCurrentHealth(Value);
 }
 
 bool UPW_CharacterHealthComponent::GetIsFight()
