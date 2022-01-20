@@ -69,6 +69,8 @@ APerfect_WorldCharacter::APerfect_WorldCharacter()
 	GetCharacterMovement()->MaxWalkSpeed = CurrentSpeed;
 	GetCharacterMovement()->MinAnalogWalkSpeed = CurrentSpeed;
 	GetCharacterMovement()->AirControl = 1.0f;
+
+	HealthComponent = CreateDefaultSubobject<UPW_CharacterHealthComponent>(TEXT("HealthComponent"));
 }
 
 void APerfect_WorldCharacter::Tick(float DeltaSeconds)
@@ -136,14 +138,6 @@ void APerfect_WorldCharacter::SetupPlayerInputComponent(class UInputComponent* P
 	PlayerInputComponent->BindAxis("LookUp", this, &APawn::AddControllerPitchInput);
 }
 
-void APerfect_WorldCharacter::ChangeCurrentHealth(float ChangeValue)
-{
-	bIsFight = true;
-	FightTimer = 15.0f;
-	CurrentHP = std::max(0, static_cast<int32>(CurrentHP) - static_cast<int32>(ChangeValue));
-	OnHPChange.Broadcast(CurrentHP, MaxHP);
-}
-
 void APerfect_WorldCharacter::ChangeCurrentXP(float ChangeValue)
 {
 	CurrentXP += ChangeValue;
@@ -152,8 +146,8 @@ void APerfect_WorldCharacter::ChangeCurrentXP(float ChangeValue)
 
 void APerfect_WorldCharacter::ChangeMaxHP(float Value)
 {
-	MaxHP = MaxHP + (Value * 20);
-	OnHPChange.Broadcast(CurrentHP, MaxHP);
+	uint32 MaxHP = HealthComponent->GetCurrentMaxHealth();
+	HealthComponent->SetCurrentMaxHealth(MaxHP + (Value * 20));
 }
 
 void APerfect_WorldCharacter::ChangeMaxMP(float Value)
@@ -274,16 +268,17 @@ void APerfect_WorldCharacter::CheckJump()
 
 void APerfect_WorldCharacter::RegenerationTick(float DeltaSeconds)
 {
-	if (bIsFight)
+	if (HealthComponent->GetIsFight())
 	{
+		FightTimer = HealthComponent->GetFightTimer();
 		if (FightTimer > 0.0f)
 		{
-			FightTimer -= DeltaSeconds;
+			HealthComponent->SetFightTimer(FightTimer - DeltaSeconds);
 		}
 		else
 		{
-			bIsFight = false;
-			Timer = 0.0f;
+			HealthComponent->SetsFight(false);
+			HealthComponent->SetFightTimer(0.0f);
 		}
 	}
 	else
@@ -295,9 +290,8 @@ void APerfect_WorldCharacter::RegenerationTick(float DeltaSeconds)
 		else
 		{
 			Timer = 1.0f;
-			CurrentHP = std::min(MaxHP, CurrentHP + RegenerationHP);
+			HealthComponent->ChangeCurrentHealth(RegenerationHP);
 			CurrentMP = std::min(MaxMP, CurrentMP + RegenerationMP);
-			OnHPChange.Broadcast(CurrentHP, MaxHP);
 			OnMPChange.Broadcast(CurrentMP, MaxMP);
 			//ChangeCurrentXP(25);
 		}
