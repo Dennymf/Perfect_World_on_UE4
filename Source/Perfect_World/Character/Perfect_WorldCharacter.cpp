@@ -57,16 +57,20 @@ APerfect_WorldCharacter::APerfect_WorldCharacter()
 
 	// Create a decal in the world to show the cursor's location
 	CursorToWorld = CreateDefaultSubobject<UDecalComponent>("CursorToWorld");
-	static ConstructorHelpers::FObjectFinder<UMaterial> DecalMaterialAsset(TEXT("Material'/Game/Blueprints/Character/M_Cursor_Decal.M_Cursor_Decal'"));
-	if (DecalMaterialAsset.Succeeded())
-	{
-		CursorToWorld->SetDecalMaterial(DecalMaterialAsset.Object);
-	}
+//	static ConstructorHelpers::FObjectFinder<UMaterial> DecalMaterialAsset(TEXT("Material'/Game/Blueprints/Character/M_Cursor_Decal.M_Cursor_Decal'"));
+	//if (DecalMaterialAsset.Succeeded())
+	//{
+	//	CursorToWorld->SetDecalMaterial(DecalMaterialAsset.Object);
+	//}
 	CursorToWorld->DecalSize = FVector(16.0f, 32.0f, 32.0f);
 	CursorToWorld->SetRelativeRotation(FRotator(90.0f, 0.0f, 0.0f).Quaternion());
 	CursorToWorld->SetVisibility(false);
 
 	GetCharacterMovement()->MaxWalkSpeed = CurrentSpeed;
+	GetCharacterMovement()->MinAnalogWalkSpeed = CurrentSpeed;
+	GetCharacterMovement()->AirControl = 1.0f;
+
+	HealthComponent = CreateDefaultSubobject<UPW_CharacterHealthComponent>(TEXT("HealthComponent"));
 }
 
 void APerfect_WorldCharacter::Tick(float DeltaSeconds)
@@ -78,6 +82,7 @@ void APerfect_WorldCharacter::Tick(float DeltaSeconds)
 	}
 	RegenerationTick(DeltaSeconds);
 	LevelUpTick();
+	CheckJump();
 }
 
 void APerfect_WorldCharacter::MoveToCursorTick(float DeltaSeconds)
@@ -92,16 +97,22 @@ void APerfect_WorldCharacter::MoveToCursorTick(float DeltaSeconds)
 		const FVector Direction = FRotationMatrix(rotator).GetUnitAxis(EAxis::X);
 		AddMovementInput(Direction, 1.0);
 		//SetActorRotation(rotator);
-
-		float dist = FVector::Dist(GetActorLocation(), CursorToWorld->GetRelativeLocation());
+		FVector CharacteLocation = GetActorLocation();
+		CharacteLocation.Z = 0.0f;
+		FVector CursorLocation = CursorToWorld->GetRelativeLocation();
+		CursorLocation.Z = 0.0f;
+		UE_LOG(LogTemp, Warning, TEXT("Cursor1: %s"), *CursorLocation.ToString());
+		//UE_LOG(LogTemp, Warning, TEXT("Character: %s"), *CharacteLocation.ToString());
+		float dist = FVector::Dist(CharacteLocation, CursorLocation);
 
 		if (OldDistToCursor == dist)
 		{
 			++TickToCursor;
 		}
-		if (dist <= 100.0f || TickToCursor == 5)
+		if (dist <= 5.0f || TickToCursor == 3)
 		{
 			CursorToWorld->SetVisibility(false);
+			AddMovementInput(Direction, 0.0);
 			TickToCursor = 0;
 		}
 		OldDistToCursor = dist;
@@ -114,8 +125,8 @@ void APerfect_WorldCharacter::SetupPlayerInputComponent(class UInputComponent* P
 {
 	// Set up gameplay key bindings
 	check(PlayerInputComponent);
-	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
-	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
+	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &APerfect_WorldCharacter::DoJump);
+	//PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
 
 	PlayerInputComponent->BindAxis("MoveForward", this, &APerfect_WorldCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &APerfect_WorldCharacter::MoveRight);
@@ -127,14 +138,6 @@ void APerfect_WorldCharacter::SetupPlayerInputComponent(class UInputComponent* P
 	PlayerInputComponent->BindAxis("LookUp", this, &APawn::AddControllerPitchInput);
 }
 
-void APerfect_WorldCharacter::ChangeCurrentHealth(float ChangeValue)
-{
-	bIsFight = true;
-	FightTimer = 15.0f;
-	CurrentHP = std::max(0, static_cast<int32>(CurrentHP) - static_cast<int32>(ChangeValue));
-	OnHPChange.Broadcast(CurrentHP, MaxHP);
-}
-
 void APerfect_WorldCharacter::ChangeCurrentXP(float ChangeValue)
 {
 	CurrentXP += ChangeValue;
@@ -143,8 +146,8 @@ void APerfect_WorldCharacter::ChangeCurrentXP(float ChangeValue)
 
 void APerfect_WorldCharacter::ChangeMaxHP(float Value)
 {
-	MaxHP = MaxHP + (Value * 20);
-	OnHPChange.Broadcast(CurrentHP, MaxHP);
+	uint32 MaxHP = HealthComponent->GetCurrentMaxHealth();
+	HealthComponent->SetCurrentMaxHealth(MaxHP + (Value * 20));
 }
 
 void APerfect_WorldCharacter::ChangeMaxMP(float Value)
@@ -204,9 +207,9 @@ void APerfect_WorldCharacter::MoveForward(float Value)
 		CursorToWorld->SetVisibility(false);
 		const FRotator Rotation = Controller->GetControlRotation();
 		const FRotator YawRotation(0, Rotation.Yaw, 0);
-
 		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
-		AddMovementInput(Direction, Value);
+		//AddMovementInput(Direction, Value);
+		GetCharacterMovement()->AddInputVector(Direction * Value);
 	}
 }
 
@@ -223,6 +226,16 @@ void APerfect_WorldCharacter::MoveRight(float Value)
 	}
 }
 
+void APerfect_WorldCharacter::DoJump()
+{
+	if (CurrentCountJump < 2)
+	{
+		bIsJumping = true;
+		++CurrentCountJump;
+		LaunchCharacter(FVector(0.0, 0.0f, 1000.0f), false, true);
+	}
+}
+
 void APerfect_WorldCharacter::MoveToCursor()
 {
 	if (CursorToWorld)
@@ -231,24 +244,41 @@ void APerfect_WorldCharacter::MoveToCursor()
 		{
 			FHitResult TraceHitResult;
 			PC->GetHitResultUnderCursor(ECC_Visibility, true, TraceHitResult);
-			CursorToWorld->SetWorldLocationAndRotation(TraceHitResult.Location, TraceHitResult.ImpactNormal.Rotation());
+			CursorToWorld->SetRelativeLocation(TraceHitResult.Location);
+			CursorToWorld->SetRelativeRotation(TraceHitResult.ImpactNormal.Rotation());
 			CursorToWorld->SetVisibility(true);
+			//FVector CursorLocation = CursorToWorld->GetRelativeLocation();
+			//CursorLocation.Z = 0.0f;
+			//UE_LOG(LogTemp, Warning, TEXT("Cursor: %s"), *CursorLocation.ToString());
+		}
+	}
+}
+
+void APerfect_WorldCharacter::CheckJump()
+{
+	if (APlayerController* PC = Cast<APlayerController>(GetController()))
+	{
+		if (!GetCharacterMovement()->IsFalling())
+		{
+			bIsJumping = false;
+			CurrentCountJump = 0;
 		}
 	}
 }
 
 void APerfect_WorldCharacter::RegenerationTick(float DeltaSeconds)
 {
-	if (bIsFight)
+	if (HealthComponent->GetIsFight())
 	{
+		FightTimer = HealthComponent->GetFightTimer();
 		if (FightTimer > 0.0f)
 		{
-			FightTimer -= DeltaSeconds;
+			HealthComponent->SetFightTimer(FightTimer - DeltaSeconds);
 		}
 		else
 		{
-			bIsFight = false;
-			Timer = 0.0f;
+			HealthComponent->SetsFight(false);
+			HealthComponent->SetFightTimer(0.0f);
 		}
 	}
 	else
@@ -260,9 +290,8 @@ void APerfect_WorldCharacter::RegenerationTick(float DeltaSeconds)
 		else
 		{
 			Timer = 1.0f;
-			CurrentHP = std::min(MaxHP, CurrentHP + RegenerationHP);
+			HealthComponent->ChangeCurrentHealth(RegenerationHP);
 			CurrentMP = std::min(MaxMP, CurrentMP + RegenerationMP);
-			OnHPChange.Broadcast(CurrentHP, MaxHP);
 			OnMPChange.Broadcast(CurrentMP, MaxMP);
 			//ChangeCurrentXP(25);
 		}

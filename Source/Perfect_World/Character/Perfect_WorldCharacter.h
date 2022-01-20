@@ -5,9 +5,10 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "../FuncLibrary/Types.h"
+#include "PW_CharacterHealthComponent.h"
+
 #include "Perfect_WorldCharacter.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnHPChange, int32, CurHP, int32, MaxHP);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnMPChange, int32, CurMP, int32, MaxMP);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnLevelChange, int32, Level);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnFreePointChange, int32, FreePoint);
@@ -21,17 +22,20 @@ class APerfect_WorldCharacter : public ACharacter
 	GENERATED_BODY()
 
 		/** Camera boom positioning the camera behind the character */
-		UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 		class USpringArmComponent* CameraBoom;
 
 	/** Follow camera */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 		class UCameraComponent* FollowCamera;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Cursor, meta = (AllowPrivateAccess = "true"))
 		class UDecalComponent* CursorToWorld;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+		class UPW_CharacterHealthComponent* HealthComponent;
 
 	class UWidget* statsWidget;
+
 
 	float OldDistToCursor;
 	int8 TickToCursor;
@@ -46,8 +50,6 @@ class APerfect_WorldCharacter : public ACharacter
 	uint32 MinDamageMagic = 1;
 	uint32 MaxDamageMagic = 1;
 
-	uint32 CurrentHP = 1;
-	uint32 MaxHP = 100;
 	uint32 CurrentMP = 1;
 	uint32 MaxMP = 100;
 	uint8 RegenerationHP = 5;
@@ -62,12 +64,10 @@ class APerfect_WorldCharacter : public ACharacter
 	float CurrentSpeed = 500.0f;
 	float AttackSpeed = 1.0f;
 
-	bool bIsFight = false;
-	float FightTimer = 0.0f;
+	bool bIsJumping = false;
+	int8 CurrentCountJump = 0;
 
 public:
-	UPROPERTY(BlueprintAssignable, Category = "Stats");
-	FOnHPChange OnHPChange;
 	UPROPERTY(BlueprintAssignable, Category = "Stats");
 	FOnMPChange OnMPChange;
 	UPROPERTY(BlueprintAssignable, Category = "Stats");
@@ -102,7 +102,11 @@ protected:
 	/** Called for side to side input */
 	void MoveRight(float Value);
 
+	void DoJump();
+
 	void MoveToCursor();
+
+	void CheckJump();
 
 	void RegenerationTick(float DeltaSeconds);
 
@@ -123,8 +127,6 @@ public:
 	UFUNCTION(BlueprintCallable)
 		ECharacterSpiritualCultivation getStatus() { return Cultivation; }
 	UFUNCTION(BlueprintCallable)
-		void ChangeCurrentHealth(float ChangeValue);
-	UFUNCTION(BlueprintCallable)
 		void ChangeCurrentXP(float ChangeValue);
 	UFUNCTION(BlueprintCallable)
 		void ChangeMaxHP(float Value);
@@ -136,21 +138,9 @@ public:
 		void ChangeMagDamage(float Value);
 
 	UFUNCTION(BlueprintCallable)
-		int32 GetHP()
-	{
-		return CurrentHP;
-	}
-
-	UFUNCTION(BlueprintCallable)
 		int32 GetMP()
 	{
 		return CurrentMP;
-	}
-
-	UFUNCTION(BlueprintCallable)
-		int32 GetMaxHP()
-	{
-		return MaxHP;
 	}
 
 	UFUNCTION(BlueprintCallable)

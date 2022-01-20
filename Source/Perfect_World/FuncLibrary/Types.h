@@ -24,6 +24,14 @@ enum class ECharacterSpiritualCultivation : uint8
 	CelestialDemon UMETA(DisplayName = "Celestial Demon"),
 };
 
+UENUM(BlueprintType)
+enum class ECharacterRace : uint8
+{
+	Human UMETA(DisplayName = "Human"),
+	Elf UMETA(DisplayName = "Elf"),
+	Untamed UMETA(DisplayName = "Untamed")
+};
+
 UCLASS()
 class PERFECT_WORLD_API UTypes : public UBlueprintFunctionLibrary
 {
