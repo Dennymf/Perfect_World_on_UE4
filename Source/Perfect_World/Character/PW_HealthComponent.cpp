@@ -37,7 +37,7 @@ int32 UPW_HealthComponent::GetCurrentHealth()
 	return CurrentHP;
 }
 
-int32 UPW_HealthComponent::GetCurrentMaxHealth()
+int32 UPW_HealthComponent::GetMaxHealth()
 {
 
 	return MaxHP;
@@ -49,7 +49,7 @@ void UPW_HealthComponent::SetCurrentHealth(int32 Value)
 	OnHPChange.Broadcast(CurrentHP, MaxHP);
 }
 
-void UPW_HealthComponent::SetCurrentMaxHealth(int32 Value)
+void UPW_HealthComponent::SetMaxHealth(int32 Value)
 {
 	MaxHP = Value;
 	OnHPChange.Broadcast(CurrentHP, MaxHP);
