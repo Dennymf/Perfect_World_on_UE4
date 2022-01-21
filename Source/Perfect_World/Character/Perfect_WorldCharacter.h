@@ -5,16 +5,9 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "../FuncLibrary/Types.h"
-#include "PW_CharacterHealthComponent.h"
+#include "PW_CharCharacteristicComponent.h"
 
 #include "Perfect_WorldCharacter.generated.h"
-
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnMPChange, int32, CurMP, int32, MaxMP);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnLevelChange, int32, Level);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnFreePointChange, int32, FreePoint);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnXPChange, int32, XP, int32, NeedXP);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnPhysdamageChange, int32, MinPhysDamage, int32, MaxPhysDamage);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnMagdamageChange, int32, MinMagDamage, int32, MaxMagDamage);
 
 UCLASS(config = Game)
 class APerfect_WorldCharacter : public ACharacter
@@ -31,9 +24,8 @@ class APerfect_WorldCharacter : public ACharacter
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Cursor, meta = (AllowPrivateAccess = "true"))
 		class UDecalComponent* CursorToWorld;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Health", meta = (AllowPrivateAccess = "true"))
-		class UPW_CharacterHealthComponent* CharHealthComponent;
-
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Characteristic", meta = (AllowPrivateAccess = "true"))
+		class UPW_CharCharacteristicComponent* CharCharacteristicComponent;
 	class UWidget* statsWidget;
 
 
@@ -41,46 +33,13 @@ class APerfect_WorldCharacter : public ACharacter
 	int8 TickToCursor;
 
 	ECharacterSpiritualCultivation Cultivation = ECharacterSpiritualCultivation::SpiritualAdept;
-	uint8 CurrentLevel = 1;
-	uint8 MaxLevel = 105;
-	uint32 CurrentXP = 0;
-	uint32 NeededXP = 100;
-	uint32 MinDamagePhys = 1;
-	uint32 MaxDamagePhys = 1;
-	uint32 MinDamageMagic = 1;
-	uint32 MaxDamageMagic = 1;
-
-	uint32 CurrentMP = 1;
-	uint32 MaxMP = 100;
-	uint8 RegenerationHP = 5;
-	uint8 RegenerationMP = 4;
 
 	float Timer = 1.0f;
-	uint32 CurrentIntelligence = 5;
-	uint32 CurrentAgility = 5;
-	uint32 CurrentStrength = 5;
-	uint32 CurrentEndurance = 5;
-	uint32 FreePoint = 5;
-	float CurrentSpeed = 500.0f;
-	float AttackSpeed = 1.0f;
 
 	bool bIsJumping = false;
 	int8 CurrentCountJump = 0;
 
 public:
-	UPROPERTY(BlueprintAssignable, Category = "Stats");
-	FOnMPChange OnMPChange;
-	UPROPERTY(BlueprintAssignable, Category = "Stats");
-	FOnLevelChange OnLevelChange;
-	UPROPERTY(BlueprintAssignable, Category = "Stats");
-	FOnFreePointChange OnFreePointChange;
-	UPROPERTY(BlueprintAssignable, Category = "Stats");
-	FOnXPChange OnXPChange;
-	UPROPERTY(BlueprintAssignable, Category = "Stats");
-	FOnPhysdamageChange OnPhysdamageChange;
-	UPROPERTY(BlueprintAssignable, Category = "Stats");
-	FOnMagdamageChange OnMagdamageChange;
-
 	APerfect_WorldCharacter();
 	virtual void Tick(float DeltaSeconds) override;
 
@@ -110,7 +69,7 @@ protected:
 
 	void RegenerationTick(float DeltaSeconds);
 
-	void LevelUpTick();
+	//void LevelUpTick();
 
 protected:
 	// APawn interface
@@ -126,113 +85,4 @@ public:
 	FORCEINLINE class UDecalComponent* GetCursorToWorld() { return CursorToWorld; }
 	UFUNCTION(BlueprintCallable)
 		ECharacterSpiritualCultivation getStatus() { return Cultivation; }
-	UFUNCTION(BlueprintCallable)
-		void ChangeCurrentXP(float ChangeValue);
-	UFUNCTION(BlueprintCallable)
-		void ChangeMaxHP(float Value);
-	UFUNCTION(BlueprintCallable)
-		void ChangeMaxMP(float Value);
-	UFUNCTION(BlueprintCallable)
-		void ChangePhysDamage(float Value);
-	UFUNCTION(BlueprintCallable)
-		void ChangeMagDamage(float Value);
-
-	UFUNCTION(BlueprintCallable)
-		int32 GetMP()
-	{
-		return CurrentMP;
-	}
-
-	UFUNCTION(BlueprintCallable)
-		int32 GetMaxMP()
-	{
-		return MaxMP;
-	}
-
-	UFUNCTION(BlueprintCallable)
-		int32 GetLevel()
-	{
-		return CurrentLevel;
-	}
-
-	UFUNCTION(BlueprintCallable)
-		int32 GetCurrentXP()
-	{
-		return CurrentXP;
-	}
-
-	UFUNCTION(BlueprintCallable)
-		int32 GetNeededXP()
-	{
-		return NeededXP;
-	}
-
-	UFUNCTION(BlueprintCallable)
-		int32 GetMinDamagePhys()
-	{
-		return MinDamagePhys;
-	}
-
-	UFUNCTION(BlueprintCallable)
-		int32 GetMaxDamagePhys()
-	{
-		return MaxDamagePhys;
-	}
-
-	UFUNCTION(BlueprintCallable)
-		int32 GetMinDamageMagic()
-	{
-		return MinDamageMagic;
-	}
-
-	UFUNCTION(BlueprintCallable)
-		int32 GetMaxDamageMagic()
-	{
-		return MaxDamageMagic;
-	}
-
-	UFUNCTION(BlueprintCallable)
-		int32 GetCurrentIntelligence()
-	{
-		return CurrentIntelligence;
-	}
-
-	UFUNCTION(BlueprintCallable)
-		int32 GetCurrentStrength()
-	{
-		return CurrentStrength;
-	}
-
-	UFUNCTION(BlueprintCallable)
-		int32 GetCurrentEndurance()
-	{
-		return CurrentEndurance;
-	}
-
-	UFUNCTION(BlueprintCallable)
-		int32 GetCurrentAgility()
-	{
-		return CurrentAgility;
-	}
-
-	UFUNCTION(BlueprintCallable)
-		int32 GetFreePoint()
-	{
-		return FreePoint;
-	}
-
-	UFUNCTION(BlueprintCallable)
-		void SetCurrentIntelligence(int32 value);
-
-	UFUNCTION(BlueprintCallable)
-		void SetCurrentStrength(int32 value);
-
-	UFUNCTION(BlueprintCallable)
-		void SetCurrentEndurance(int32 value);
-
-	UFUNCTION(BlueprintCallable)
-		void SetCurrentAgility(int32 value);
-
-	UFUNCTION(BlueprintCallable)
-		void SetFreePoint(int32 value);
 };

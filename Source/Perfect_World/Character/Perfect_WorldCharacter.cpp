@@ -66,11 +66,11 @@ APerfect_WorldCharacter::APerfect_WorldCharacter()
 	CursorToWorld->SetRelativeRotation(FRotator(90.0f, 0.0f, 0.0f).Quaternion());
 	CursorToWorld->SetVisibility(false);
 
-	GetCharacterMovement()->MaxWalkSpeed = CurrentSpeed;
-	GetCharacterMovement()->MinAnalogWalkSpeed = CurrentSpeed;
-	GetCharacterMovement()->AirControl = 1.0f;
+	CharCharacteristicComponent = CreateDefaultSubobject<UPW_CharCharacteristicComponent>(TEXT("CharacteristicComponent"));
 
-	CharHealthComponent = CreateDefaultSubobject<UPW_CharacterHealthComponent>(TEXT("HealthComponent"));
+	GetCharacterMovement()->MaxWalkSpeed = CharCharacteristicComponent->GetSpeed();
+	GetCharacterMovement()->MinAnalogWalkSpeed = CharCharacteristicComponent->GetSpeed();
+	GetCharacterMovement()->AirControl = 1.0f;
 }
 
 void APerfect_WorldCharacter::Tick(float DeltaSeconds)
@@ -81,7 +81,7 @@ void APerfect_WorldCharacter::Tick(float DeltaSeconds)
 		MoveToCursorTick(DeltaSeconds);
 	}
 	RegenerationTick(DeltaSeconds);
-	LevelUpTick();
+//	LevelUpTick();
 	CheckJump();
 }
 
@@ -136,68 +136,6 @@ void APerfect_WorldCharacter::SetupPlayerInputComponent(class UInputComponent* P
 	// "turnrate" is for devices that we choose to treat as a rate of change, such as an analog joystick
 	PlayerInputComponent->BindAxis("Turn", this, &APawn::AddControllerYawInput);
 	PlayerInputComponent->BindAxis("LookUp", this, &APawn::AddControllerPitchInput);
-}
-
-void APerfect_WorldCharacter::ChangeCurrentXP(float ChangeValue)
-{
-	CurrentXP += ChangeValue;
-	OnXPChange.Broadcast(CurrentXP, NeededXP);
-}
-
-void APerfect_WorldCharacter::ChangeMaxHP(float Value)
-{
-	uint32 MaxHP = CharHealthComponent->GetCurrentMaxHealth();
-	CharHealthComponent->SetCurrentMaxHealth(MaxHP + (Value * 20));
-}
-
-void APerfect_WorldCharacter::ChangeMaxMP(float Value)
-{
-	MaxMP = MaxMP + (Value * 20);
-	OnMPChange.Broadcast(CurrentMP, MaxMP);
-}
-
-void APerfect_WorldCharacter::ChangePhysDamage(float Value)
-{
-	MinDamagePhys = MinDamagePhys + (Value);
-	MaxDamagePhys = MaxDamagePhys + (Value);
-	OnPhysdamageChange.Broadcast(MinDamagePhys, MaxDamagePhys);
-}
-
-void APerfect_WorldCharacter::ChangeMagDamage(float Value)
-{
-	MinDamageMagic = MinDamageMagic + (Value);
-	MaxDamageMagic = MaxDamageMagic + (Value);
-	OnMagdamageChange.Broadcast(MinDamageMagic, MaxDamageMagic);
-}
-
-void APerfect_WorldCharacter::SetCurrentIntelligence(int32 value)
-{
-	ChangeMaxMP(value - CurrentIntelligence);
-	ChangeMagDamage(value - CurrentIntelligence);
-	CurrentIntelligence = value;
-}
-
-void APerfect_WorldCharacter::SetCurrentStrength(int32 value)
-{
-	ChangePhysDamage(value - CurrentStrength);
-	CurrentStrength = value;
-}
-
-void APerfect_WorldCharacter::SetCurrentEndurance(int32 value)
-{
-	ChangeMaxHP(value - CurrentEndurance);
-	CurrentEndurance = value;
-}
-
-void APerfect_WorldCharacter::SetCurrentAgility(int32 value)
-{
-	ChangePhysDamage(value - CurrentAgility);
-	CurrentAgility = value;
-}
-
-void APerfect_WorldCharacter::SetFreePoint(int32 value)
-{
-	FreePoint = value;
 }
 
 void APerfect_WorldCharacter::MoveForward(float Value)
@@ -268,17 +206,17 @@ void APerfect_WorldCharacter::CheckJump()
 
 void APerfect_WorldCharacter::RegenerationTick(float DeltaSeconds)
 {
-	if (CharHealthComponent->GetIsFight())
+	if (CharCharacteristicComponent->GetHealthComponent()->GetIsFight())
 	{
-		float FightTimer = CharHealthComponent->GetFightTimer();
+		float FightTimer = CharCharacteristicComponent->GetHealthComponent()->GetFightTimer();
 		if (FightTimer > 0.0f)
 		{
-			CharHealthComponent->SetFightTimer(FightTimer - DeltaSeconds);
+			CharCharacteristicComponent->GetHealthComponent()->SetFightTimer(FightTimer - DeltaSeconds);
 		}
 		else
 		{
-			CharHealthComponent->SetIsFight(false);
-			CharHealthComponent->SetFightTimer(0.0f);
+			CharCharacteristicComponent->GetHealthComponent()->SetIsFight(false);
+			CharCharacteristicComponent->GetHealthComponent()->SetFightTimer(0.0f);
 		}
 	}
 	else
@@ -290,27 +228,26 @@ void APerfect_WorldCharacter::RegenerationTick(float DeltaSeconds)
 		else
 		{
 			Timer = 1.0f;
-			CharHealthComponent->ChangeCurrentHealth(RegenerationHP);
-			CurrentMP = std::min(MaxMP, CurrentMP + RegenerationMP);
-			OnMPChange.Broadcast(CurrentMP, MaxMP);
+			CharCharacteristicComponent->GetHealthComponent()->ChangeCurrentHealth(5);
+			CharCharacteristicComponent->GetManaComponent()->ChangeCurrentMana(4);
 			//ChangeCurrentXP(25);
 		}
 	}
 }
 
-void APerfect_WorldCharacter::LevelUpTick()
-{
-	if (CurrentLevel == 105)
-	{
-		CurrentXP = 0;
-	}
-	else if (CurrentXP >= NeededXP)
-	{
-		CurrentXP -= NeededXP;
-		++CurrentLevel;
-		FreePoint += 5;
-		OnLevelChange.Broadcast(CurrentLevel);
-		OnFreePointChange.Broadcast(FreePoint);
-		OnXPChange.Broadcast(CurrentXP, NeededXP);
-	}
-}
+//void APerfect_WorldCharacter::LevelUpTick()
+//{
+//	if (CurrentLevel == 105)
+//	{
+//		CurrentXP = 0;
+//	}
+//	else if (CurrentXP >= NeededXP)
+//	{
+//		CurrentXP -= NeededXP;
+//		++CurrentLevel;
+//		FreePoint += 5;
+//		OnLevelChange.Broadcast(CurrentLevel);
+//		OnFreePointChange.Broadcast(FreePoint);
+//		OnXPChange.Broadcast(CurrentXP, NeededXP);
+//	}
+//}

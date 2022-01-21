@@ -38,11 +38,11 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Health")
 	int32 GetCurrentHealth();
 	UFUNCTION(BlueprintCallable, Category = "Health")
-		int32 GetCurrentMaxHealth();
+		int32 GetMaxHealth();
 	UFUNCTION(BlueprintCallable, Category = "Health")
 		void SetCurrentHealth(int32 Value);
 	UFUNCTION(BlueprintCallable, Category = "Health")
-		void SetCurrentMaxHealth(int32 Value);
+		void SetMaxHealth(int32 Value);
 	UFUNCTION(BlueprintCallable, Category = "Health")
 		virtual void ChangeCurrentHealth(int32 Value);
 	UFUNCTION(BlueprintNativeEvent)
