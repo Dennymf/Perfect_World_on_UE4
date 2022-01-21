@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+
 #include "PW_HealthComponent.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnHPChange, int32, CurHP, int32, MaxHP);
@@ -18,16 +19,17 @@ public:
 	// Sets default values for this component's properties
 	UPW_HealthComponent();
 
-	UPROPERTY(BlueprintAssignable, EditAnywhere, BlueprintReadWrite, Category = "Health")
+	UPROPERTY(BlueprintAssignable, Category = "Health")
 		FOnHPChange OnHPChange;
-	UPROPERTY(BlueprintAssignable, EditAnywhere, BlueprintReadWrite, Category = "Health")
+	UPROPERTY(BlueprintAssignable, Category = "Health")
 		FOnDead OnDead;
-protected:
-	// Called when the game starts
-	virtual void BeginPlay() override;
 
 	uint32 CurrentHP = 1;
 	uint32 MaxHP = 100;
+
+protected:
+	// Called when the game starts
+	virtual void BeginPlay() override;
 
 public:	
 	// Called every frame
@@ -38,11 +40,11 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Health")
 		int32 GetCurrentMaxHealth();
 	UFUNCTION(BlueprintCallable, Category = "Health")
-		void SetCurrentHealth(uint32 Value);
+		void SetCurrentHealth(int32 Value);
 	UFUNCTION(BlueprintCallable, Category = "Health")
-		void SetCurrentMaxHealth(uint32 Value);
+		void SetCurrentMaxHealth(int32 Value);
 	UFUNCTION(BlueprintCallable, Category = "Health")
-		void ChangeCurrentHealth(uint32 Value);
+		virtual void ChangeCurrentHealth(int32 Value);
 	UFUNCTION(BlueprintNativeEvent)
 		void DeadEvent();
 };

@@ -57,11 +57,11 @@ APerfect_WorldCharacter::APerfect_WorldCharacter()
 
 	// Create a decal in the world to show the cursor's location
 	CursorToWorld = CreateDefaultSubobject<UDecalComponent>("CursorToWorld");
-//	static ConstructorHelpers::FObjectFinder<UMaterial> DecalMaterialAsset(TEXT("Material'/Game/Blueprints/Character/M_Cursor_Decal.M_Cursor_Decal'"));
-	//if (DecalMaterialAsset.Succeeded())
-	//{
-	//	CursorToWorld->SetDecalMaterial(DecalMaterialAsset.Object);
-	//}
+	static ConstructorHelpers::FObjectFinder<UMaterial> DecalMaterialAsset(TEXT("Material'/Game/Blueprints/Character/M_Cursor_Decal.M_Cursor_Decal'"));
+	if (DecalMaterialAsset.Succeeded())
+	{
+		CursorToWorld->SetDecalMaterial(DecalMaterialAsset.Object);
+	}
 	CursorToWorld->DecalSize = FVector(16.0f, 32.0f, 32.0f);
 	CursorToWorld->SetRelativeRotation(FRotator(90.0f, 0.0f, 0.0f).Quaternion());
 	CursorToWorld->SetVisibility(false);
@@ -70,7 +70,7 @@ APerfect_WorldCharacter::APerfect_WorldCharacter()
 	GetCharacterMovement()->MinAnalogWalkSpeed = CurrentSpeed;
 	GetCharacterMovement()->AirControl = 1.0f;
 
-	HealthComponent = CreateDefaultSubobject<UPW_CharacterHealthComponent>(TEXT("HealthComponent"));
+	CharHealthComponent = CreateDefaultSubobject<UPW_CharacterHealthComponent>(TEXT("HealthComponent"));
 }
 
 void APerfect_WorldCharacter::Tick(float DeltaSeconds)
@@ -146,8 +146,8 @@ void APerfect_WorldCharacter::ChangeCurrentXP(float ChangeValue)
 
 void APerfect_WorldCharacter::ChangeMaxHP(float Value)
 {
-	uint32 MaxHP = HealthComponent->GetCurrentMaxHealth();
-	HealthComponent->SetCurrentMaxHealth(MaxHP + (Value * 20));
+	uint32 MaxHP = CharHealthComponent->GetCurrentMaxHealth();
+	CharHealthComponent->SetCurrentMaxHealth(MaxHP + (Value * 20));
 }
 
 void APerfect_WorldCharacter::ChangeMaxMP(float Value)
@@ -268,17 +268,17 @@ void APerfect_WorldCharacter::CheckJump()
 
 void APerfect_WorldCharacter::RegenerationTick(float DeltaSeconds)
 {
-	if (HealthComponent->GetIsFight())
+	if (CharHealthComponent->GetIsFight())
 	{
-		FightTimer = HealthComponent->GetFightTimer();
+		float FightTimer = CharHealthComponent->GetFightTimer();
 		if (FightTimer > 0.0f)
 		{
-			HealthComponent->SetFightTimer(FightTimer - DeltaSeconds);
+			CharHealthComponent->SetFightTimer(FightTimer - DeltaSeconds);
 		}
 		else
 		{
-			HealthComponent->SetsFight(false);
-			HealthComponent->SetFightTimer(0.0f);
+			CharHealthComponent->SetIsFight(false);
+			CharHealthComponent->SetFightTimer(0.0f);
 		}
 	}
 	else
@@ -290,7 +290,7 @@ void APerfect_WorldCharacter::RegenerationTick(float DeltaSeconds)
 		else
 		{
 			Timer = 1.0f;
-			HealthComponent->ChangeCurrentHealth(RegenerationHP);
+			CharHealthComponent->ChangeCurrentHealth(RegenerationHP);
 			CurrentMP = std::min(MaxMP, CurrentMP + RegenerationMP);
 			OnMPChange.Broadcast(CurrentMP, MaxMP);
 			//ChangeCurrentXP(25);

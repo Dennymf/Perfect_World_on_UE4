@@ -3,10 +3,13 @@
 
 #include "PW_CharacterHealthComponent.h"
 
-void UPW_CharacterHealthComponent::ChangeCurrentHealth(uint32 Value)
+void UPW_CharacterHealthComponent::ChangeCurrentHealth(int32 Value)
 {
-	bIsFight = true;
-	FightTimer = 15.0f;
+	if (Value < 0)
+	{
+		bIsFight = true;
+		FightTimer = 15.0f;
+	}
 	Super::ChangeCurrentHealth(Value);
 }
 
@@ -23,7 +26,6 @@ void UPW_CharacterHealthComponent::SetIsFight(bool Value)
 float UPW_CharacterHealthComponent::GetFightTimer()
 {
 	return FightTimer;
-;
 }
 
 void UPW_CharacterHealthComponent::SetFightTimer(float Value)

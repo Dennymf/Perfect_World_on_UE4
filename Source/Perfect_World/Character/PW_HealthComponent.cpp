@@ -43,21 +43,21 @@ int32 UPW_HealthComponent::GetCurrentMaxHealth()
 	return MaxHP;
 }
 
-void UPW_HealthComponent::SetCurrentHealth(uint32 Value)
+void UPW_HealthComponent::SetCurrentHealth(int32 Value)
 {
 	CurrentHP = Value;
 	OnHPChange.Broadcast(CurrentHP, MaxHP);
 }
 
-void UPW_HealthComponent::SetCurrentMaxHealth(uint32 Value)
+void UPW_HealthComponent::SetCurrentMaxHealth(int32 Value)
 {
 	MaxHP = Value;
 	OnHPChange.Broadcast(CurrentHP, MaxHP);
 }
 
-void UPW_HealthComponent::ChangeCurrentHealth(uint32 Value)
+void UPW_HealthComponent::ChangeCurrentHealth(int32 Value)
 {
-	CurrentHP = std::max(0, static_cast<int32>(CurrentHP) - static_cast<int32>(Value));
+	CurrentHP = std::max(0, std::min(static_cast<int32>(CurrentHP) + Value, static_cast<int32>(MaxHP)));
 	OnHPChange.Broadcast(CurrentHP, MaxHP);
 	if (Value < 0)
 	{

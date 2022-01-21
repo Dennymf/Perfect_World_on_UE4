@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "PW_HealthComponent.h"
+
 #include "PW_CharacterHealthComponent.generated.h"
 
 /**
@@ -19,7 +20,7 @@ protected:
 	float FightTimer = 0.0f;
 
 public:
-	void ChangeCurrentHealth(uint32 Value) override;
+	void ChangeCurrentHealth(int32 Value) override;
 	bool GetIsFight();
 	void SetIsFight(bool Value);
 	float GetFightTimer();
