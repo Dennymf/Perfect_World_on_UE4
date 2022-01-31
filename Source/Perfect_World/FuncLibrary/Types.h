@@ -3,6 +3,7 @@
 #pragma once
 
 #include "Kismet/BlueprintFunctionLibrary.h"
+#include "Engine/DataTable.h"
 #include "Types.generated.h"
 
 UENUM(BlueprintType)
@@ -30,6 +31,29 @@ enum class ECharacterRace : uint8
 	Human UMETA(DisplayName = "Human"),
 	Elf UMETA(DisplayName = "Elf"),
 	Untamed UMETA(DisplayName = "Untamed")
+};
+
+USTRUCT(BlueprintType)
+struct FEnemyInfo : public FTableRowBase
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Characteristic")
+		int32 MaxHP;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Characteristic")
+		int32 Level;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Characteristic")
+		int32 MaxPhysDamage;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Characteristic")
+		int32 MinPhysDamage;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Characteristic")
+		int32 MaxMagicDamage;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Characteristic")
+		int32 MinMagicDamage;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Characteristic")
+		float CurrentSpeed;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Characteristic")
+		float AttackSpeed;
 };
 
 UCLASS()

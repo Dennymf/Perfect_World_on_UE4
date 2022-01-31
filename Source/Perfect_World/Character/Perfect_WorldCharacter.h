@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "../FuncLibrary/Types.h"
+#include "Engine/DataTable.h"
 #include "PW_CharCharacteristicComponent.h"
 
 #include "Perfect_WorldCharacter.generated.h"
@@ -85,4 +86,6 @@ public:
 	FORCEINLINE class UDecalComponent* GetCursorToWorld() { return CursorToWorld; }
 	UFUNCTION(BlueprintCallable)
 		ECharacterSpiritualCultivation getStatus() { return Cultivation; }
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test")
+	//	UDataTable* EnemyTable = nullptr;
 };

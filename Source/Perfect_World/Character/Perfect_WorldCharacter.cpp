@@ -23,7 +23,9 @@
 
 APerfect_WorldCharacter::APerfect_WorldCharacter()
 {
-	// Set size for collision capsule
+	//FEnemyInfo* Info;
+	//Info = EnemyTable->FindRow<FEnemyInfo>("Росянка")
+	//Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
 
 	// set our turn rates for input
