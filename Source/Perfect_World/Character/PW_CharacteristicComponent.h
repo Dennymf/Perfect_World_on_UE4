@@ -6,6 +6,7 @@
 #include "Components/ActorComponent.h"
 #include "PW_CharacteristicComponent.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnNameChange, FName, Name);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnLevelChange, int32, Level);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPhysMinDamageChange, int32, MinPhysDamage);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPhysMaxDamageChange, int32, MaxPhysDamage);
@@ -16,7 +17,8 @@ UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class PERFECT_WORLD_API UPW_CharacteristicComponent : public UActorComponent
 {
 	GENERATED_BODY()
-	
+
+	FName Name;
 	uint8 CurrentLevel = 1;
 	uint32 MinDamagePhys = 1;
 	uint32 MaxDamagePhys = 1;
@@ -30,6 +32,8 @@ public:
 	// Sets default values for this component's properties
 	UPW_CharacteristicComponent();
 
+	UPROPERTY(BlueprintAssignable, Category = "Characteristic");
+	FOnNameChange OnNameChange;
 	UPROPERTY(BlueprintAssignable, Category = "Characteristic");
 	FOnLevelChange OnLevelChange;
 	UPROPERTY(BlueprintAssignable, Category = "Characteristic")
@@ -48,6 +52,9 @@ protected:
 public:	
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+
+	UFUNCTION(BlueprintCallable, Category = "Characteristic")
+		virtual FName GetName();
 
 	UFUNCTION(BlueprintCallable, Category = "Characteristic")
 		virtual int32 GetLevel();
@@ -69,6 +76,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Characteristic")
 		virtual float GetAttackSpeed();
+
+	UFUNCTION(BlueprintCallable, Category = "Characteristic")
+		virtual void SetName(FName Value);
 
 	UFUNCTION(BlueprintCallable, Category = "Characteristic")
 		virtual void SetCurrentLevel(int32 Value);

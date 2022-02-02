@@ -32,6 +32,11 @@ void UPW_CharacteristicComponent::TickComponent(float DeltaTime, ELevelTick Tick
 	// ...
 }
 
+FName UPW_CharacteristicComponent::GetName()
+{
+	return Name;
+}
+
 int32 UPW_CharacteristicComponent::GetLevel()
 {
 	return CurrentLevel;
@@ -67,6 +72,14 @@ float UPW_CharacteristicComponent::GetAttackSpeed()
 	return AttackSpeed;
 
 }
+
+void UPW_CharacteristicComponent::SetName(FName Value)
+{
+	Name = Value;
+	OnNameChange.Broadcast(Name);
+}
+
+
 void UPW_CharacteristicComponent::SetCurrentLevel(int32 Value)
 {
 	CurrentLevel = Value;

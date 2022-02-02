@@ -42,6 +42,7 @@ void APW_EnemyBase::InitCharacteristics(FName EnemyName)
 	{
 		if (myGI->GetEnemyInfoByName(EnemyName, EnemyInfo))
 		{
+			CharacteristicComponent->SetName(EnemyName);
 			CharacteristicComponent->SetCurrentLevel(EnemyInfo.Level);
 			CharacteristicComponent->SetMinPhysDamage(EnemyInfo.MinPhysDamage);
 			CharacteristicComponent->SetMaxPhysDamage(EnemyInfo.MaxPhysDamage);
