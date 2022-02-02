@@ -32,6 +32,11 @@ void UPW_CharacteristicComponent::TickComponent(float DeltaTime, ELevelTick Tick
 	// ...
 }
 
+int32 UPW_CharacteristicComponent::GetLevel()
+{
+	return CurrentLevel;
+}
+
 int32 UPW_CharacteristicComponent::GetMinDamagePhys()
 {
 	return MinDamagePhys;
@@ -55,6 +60,17 @@ int32 UPW_CharacteristicComponent::GetMaxDamageMagic()
 float UPW_CharacteristicComponent::GetSpeed()
 {
 	return CurrentSpeed;
+}
+
+float UPW_CharacteristicComponent::GetAttackSpeed()
+{
+	return AttackSpeed;
+
+}
+void UPW_CharacteristicComponent::SetCurrentLevel(int32 Value)
+{
+	CurrentLevel = Value;
+	OnLevelChange.Broadcast(CurrentLevel);
 }
 
 void UPW_CharacteristicComponent::SetMinPhysDamage(int32 Value)
@@ -84,4 +100,9 @@ void UPW_CharacteristicComponent::SetMaxMagicDamage(int32 Value)
 void UPW_CharacteristicComponent::SetSpeed(float Value)
 {
 	CurrentSpeed = Value;
+}
+
+void UPW_CharacteristicComponent::SetAttackSpeed(float Value)
+{
+	AttackSpeed = Value;
 }

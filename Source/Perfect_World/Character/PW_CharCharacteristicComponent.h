@@ -13,7 +13,6 @@
  * 
  */
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnLevelChange, int32, Level);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnFreePointChange, int32, FreePoint);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnXPChange, int32, XP, int32, NeedXP);
 
@@ -26,7 +25,6 @@ class PERFECT_WORLD_API UPW_CharCharacteristicComponent : public UPW_Characteris
 		class UPW_CharacterHealthComponent* CharHealthComponent;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Mana", meta = (AllowPrivateAccess = "true"))
 		class UPW_CharacterManaComponent* CharManaComponent;
-	uint8 CurrentLevel = 1;
 	uint8 MaxLevel = 105;
 	uint32 CurrentXP = 0;
 	uint32 NeededXP = 100;
@@ -43,8 +41,6 @@ public:
 	UPW_CharCharacteristicComponent();
 
 	UPROPERTY(BlueprintAssignable, Category = "Characteristic");
-	FOnLevelChange OnLevelChange;
-	UPROPERTY(BlueprintAssignable, Category = "Characteristic");
 	FOnFreePointChange OnFreePointChange;
 	UPROPERTY(BlueprintAssignable, Category = "Characteristic");
 	FOnXPChange OnXPChange;
@@ -59,12 +55,6 @@ public:
 		void ChangePhysDamage(float Value);
 	UFUNCTION(BlueprintCallable, Category = "Characteristic")
 		void ChangeMagDamage(float Value);
-
-	UFUNCTION(BlueprintCallable, Category = "Characteristic")
-		int32 GetLevel()
-	{
-		return CurrentLevel;
-	}
 
 	UFUNCTION(BlueprintCallable, Category = "Characteristic")
 		int32 GetCurrentXP()

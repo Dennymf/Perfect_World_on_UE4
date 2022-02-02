@@ -5,6 +5,8 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "../FuncLibrary/Types.h"
+#include "../Game/PW_GameInstance.h"
+#include "Engine/DataTable.h"
 #include "PW_CharCharacteristicComponent.h"
 
 #include "Perfect_WorldCharacter.generated.h"
@@ -26,8 +28,8 @@ class APerfect_WorldCharacter : public ACharacter
 		class UDecalComponent* CursorToWorld;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Characteristic", meta = (AllowPrivateAccess = "true"))
 		class UPW_CharCharacteristicComponent* CharCharacteristicComponent;
-	class UWidget* statsWidget;
 
+	class UWidget* statsWidget;
 
 	float OldDistToCursor;
 	int8 TickToCursor;
