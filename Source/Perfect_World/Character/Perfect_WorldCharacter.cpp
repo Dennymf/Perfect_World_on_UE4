@@ -24,7 +24,7 @@
 APerfect_WorldCharacter::APerfect_WorldCharacter()
 {
 	//FEnemyInfo* Info;
-	//Info = EnemyTable->FindRow<FEnemyInfo>("Росянка")
+	//Info = EnemyTable->FindRow<FEnemyInfo>("Росянка", "", false);
 	//Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
 
